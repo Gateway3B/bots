@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/bots/src",
+  "monorepo": true,
+  "root": "apps/bots",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/bots/tsconfig.app.json"
+  },
+  "projects": {
+    "bots": {
+      "type": "application",
+      "root": "apps/bots",
+      "entryFile": "main",
+      "sourceRoot": "apps/bots/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/bots/tsconfig.app.json"
+      }
+    },
+    "craber": {
+      "type": "application",
+      "root": "apps/craber",
+      "entryFile": "main",
+      "sourceRoot": "apps/craber/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/craber/tsconfig.app.json"
+      }
+    },
+    "poller": {
+      "type": "application",
+      "root": "apps/poller",
+      "entryFile": "main",
+      "sourceRoot": "apps/poller/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/poller/tsconfig.app.json"
+      }
+    },
+    "ticker": {
+      "type": "application",
+      "root": "apps/ticker",
+      "entryFile": "main",
+      "sourceRoot": "apps/ticker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ticker/tsconfig.app.json"
+      }
+    },
+    "responder": {
+      "type": "application",
+      "root": "apps/responder",
+      "entryFile": "main",
+      "sourceRoot": "apps/responder/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/responder/tsconfig.app.json"
+      }
+    }
+  }
+}

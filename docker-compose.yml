@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+    database:
+        image: 'mongo:latest'
+        expose:
+            - 27017:27017
+        ports:
+            - 27017:27017
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=docker
+            - MONGO_INITDB_ROOT_PASSWORD=docker
+        volumes:
+            - db:/data/db
+volumes:
+  db:
+    driver: local
