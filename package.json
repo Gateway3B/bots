@@ -41,7 +41,8 @@
         "rimraf": "^3.0.2",
         "rxjs": "^7.2.0",
         "sharp": "^0.31.1",
-        "vega": "^5.22.1"
+        "vega": "^5.22.1",
+        "yahoo-finance": "^0.3.7"
     },
     "devDependencies": {
         "@nestjs/cli": "^9.0.0",
@@ -87,4 +88,3 @@
         ]
     }
 }
-

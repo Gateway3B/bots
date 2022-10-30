@@ -12,7 +12,6 @@ import { createHash, randomBytes } from 'crypto';
 import {
     ActionRowBuilder,
     APIActionRowComponent,
-    APIEmbed,
     APIMessageActionRowComponent,
     ButtonBuilder,
     ButtonInteraction,
@@ -96,8 +95,9 @@ export class PollCommand implements DiscordTransformedCommand<PollDto> {
         const pollId = encodeURIComponent(
             createHash('sha256')
                 .update(
-                    this.makeQuestion(interaction.options.get('title').name) +
-                        randomBytes(256).toString(),
+                    this.makeQuestion(
+                        interaction.options.get('title').value as string,
+                    ) + randomBytes(256).toString(),
                 )
                 .digest('base64'),
         ).replace(/%/g, '');

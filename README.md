@@ -32,6 +32,18 @@
 $ npm install
 ```
 
+## Creating New App For Monorepo
+
+```bash
+$ nest generate app {appname}
+```
+
+## Run App In Monorepo
+
+```bash
+$ nest start {appname} --watch
+```
+
 ## Running the app
 
 ```bash
@@ -64,10 +76,11 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+-   Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+-   Website - [https://nestjs.com](https://nestjs.com/)
+-   Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
