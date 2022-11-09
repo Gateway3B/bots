@@ -53,6 +53,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/responder/tsconfig.app.json"
       }
+    },
+    "notion": {
+      "type": "application",
+      "root": "apps/notion",
+      "entryFile": "main",
+      "sourceRoot": "apps/notion/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notion/tsconfig.app.json"
+      }
     }
   }
 }

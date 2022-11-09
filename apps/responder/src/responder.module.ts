@@ -14,11 +14,7 @@ import { Response, ResponseSchema } from './service/response.schema';
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
-                uri: `mongodb://${configService.get<string>(
-                    'MONGO_USERNAME',
-                )}:${configService.get<string>(
-                    'MONGO_PASSWORD',
-                )}@localhost:27017?retryWrites=true&w=majority`,
+                uri: configService.get('MONGO_URI'),
             }),
             inject: [ConfigService],
         }),
@@ -35,12 +31,12 @@ import { Response, ResponseSchema } from './service/response.schema';
                     ],
                 },
                 failOnLogin: true,
-                registerCommandOptions: [
-                    {
-                        forGuild: configService.get('TEST_GUILD'),
-                        removeCommandsBefore: true,
-                    },
-                ],
+                // registerCommandOptions: [
+                //     {
+                //         forGuild: configService.get('TEST_GUILD'),
+                //         removeCommandsBefore: true,
+                //     },
+                // ],
             }),
             inject: [ConfigService],
         }),

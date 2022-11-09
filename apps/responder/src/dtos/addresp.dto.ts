@@ -1,5 +1,9 @@
-import { Param, ParamType } from '@discord-nestjs/core';
-import { Channel, Role, User } from 'discord.js';
+import {
+    Channel as ChannelParam,
+    Param,
+    ParamType,
+} from '@discord-nestjs/core';
+import { Channel, ChannelType, Role, User } from 'discord.js';
 
 export class AddRespDto {
     @Param({
@@ -56,17 +60,17 @@ export class AddRespDto {
         name: 'channel_listen',
         description:
             'Channel responder should listen for the trigger in. Defaults to all channels.',
-        type: ParamType.CHANNEL,
         required: false,
     })
+    @ChannelParam([ChannelType.GuildText])
     channelListen: Channel;
 
     @Param({
         name: 'channel_respond',
         description:
             'Channel responder should respond in. Defaults to channel trigger was posted.',
-        type: ParamType.CHANNEL,
         required: false,
     })
+    @ChannelParam([ChannelType.GuildText])
     channelRespond: Channel;
 }

@@ -7,15 +7,19 @@
     "license": "UNLICENSED",
     "scripts": {
         "prebuild": "rimraf dist",
+        "comp:dev": "docker compose -f docker-compose.dev.yml up",
+        "deploy": ".\\deploy\\deploy.bat",
+        "build:docker": "docker build -t bots .",
+        "docker:deleteold": "docker rmi $(docker images --filter dangling=true | awk {'print $3'})",
         "build": "nest build",
-        "build:all": "nest build & nest build craber & nest build poller",
+        "build:all": "nest build & nest build craber & nest build poller & nest build responder & nest build ticker & nest build notion",
         "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
         "start": "nest start",
-        "start:alldebug": "concurrently \"nest start craber --debug --watch\" \"nest start poller --debug --watch\"",
+        "start:alldebug": "concurrently \"nest start craber --debug --watch\" \"nest start poller --debug --watch\" \"nest start ticker --debug --watch\" \"nest start responder --debug --watch\" \"nest start notion --debug --watch\"",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node dist/main",
-        "start:allprod": "concurrently \"node dist/apps/craber/main\" \"node dist/apps/poller/main\"",
+        "start:allprod": "concurrently \"node dist/apps/craber/main\" \"node dist/apps/poller/main\" \"node dist/apps/ticker/main\" \"node dist/apps/responder/main\" \"node dist/apps/notion/main\"",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -31,6 +35,9 @@
         "@nestjs/core": "^9.0.0",
         "@nestjs/mongoose": "^9.2.0",
         "@nestjs/platform-express": "^9.0.0",
+        "@nestjs/schedule": "^2.1.0",
+        "@notionhq/client": "^2.2.1",
+        "@types/cron": "^2.0.0",
         "axios": "^0.27.2",
         "cheerio": "^1.0.0-rc.12",
         "concurrently": "^7.4.0",
@@ -88,3 +95,4 @@
         ]
     }
 }
+

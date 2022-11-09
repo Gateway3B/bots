@@ -1,4 +1,7 @@
 .env
+*.tar
+docker-compose.yml
+docker-compose.dev.yml
 
 # compiled output
 /dist
