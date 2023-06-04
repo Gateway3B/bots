@@ -1,10 +1,11 @@
-set ip=192.168.87.244
+set ip=192.168.1.90
 
 @REM docker save bots:latest > ./bots.tar
 
-@REM scp bots.tar g3tech@%ip%:\Users\g3tech\Server\Bots
+scp bots.tar matthewweisfeld@%ip%:~/Documents/G3Tech/Server/Bots
 
-scp docker-compose.yml g3tech@%ip%:\Users\g3tech\Server\Bots
-scp deploy/remoteDeploy.bat g3tech@%ip%:\Users\g3tech\Server\Bots
+scp docker-compose.yml matthewweisfeld@%ip%:~/Documents/G3Tech/Server/Bots
+scp deploy/remoteDeploy.sh matthewweisfeld@%ip%:~/Documents/G3Tech/Server/Bots
 
-ssh g3tech@%ip% \Users\g3tech\Server\Bots\remoteDeploy.bat
+ssh matthewweisfeld@%ip% chmod +x /home/matthewweisfeld/Documents/G3Tech/Server/Bots/remoteDeploy.sh
+ssh matthewweisfeld@%ip% /home/matthewweisfeld/Documents/G3Tech/Server/Bots/remoteDeploy.sh
