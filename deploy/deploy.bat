@@ -1,6 +1,6 @@
 set ip=192.168.1.90
 
-@REM docker save bots:latest > ./bots.tar
+docker save bots:latest > ./bots.tar
 
 scp bots.tar matthewweisfeld@%ip%:~/Documents/G3Tech/Server/Bots
 

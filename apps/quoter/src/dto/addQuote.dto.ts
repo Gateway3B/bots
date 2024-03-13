@@ -3,7 +3,7 @@ import { TextInputModalData } from 'discord.js';
 
 export class AddQuoteDto {
     @Param({
-        name: 'User',
+        name: 'user',
         description: 'User who gave the quote.',
         type: ParamType.USER,
         required: true,
@@ -11,7 +11,7 @@ export class AddQuoteDto {
     user: string;
 
     @Param({
-        name: 'Year',
+        name: 'year',
         description: 'Year of the quote.',
         type: ParamType.NUMBER,
         minValue: 1950,
@@ -21,7 +21,7 @@ export class AddQuoteDto {
     year: number;
 
     @Param({
-        name: 'Month',
+        name: 'month',
         description: 'Month of the quote.',
         type: ParamType.NUMBER,
         minValue: 1,
@@ -31,17 +31,17 @@ export class AddQuoteDto {
     month: number;
 
     @Param({
-        name: 'Day',
+        name: 'day',
         description: 'Day of the quote.',
         type: ParamType.NUMBER,
         minValue: 1,
         maxValue: 31,
-        required: true,
+        required: false,
     })
     day: number;
 }
 
 export class AddQuoteModalDto {
-    @Field('Quote')
-    username: TextInputModalData;
+    @Field('quote')
+    quote: TextInputModalData;
 }

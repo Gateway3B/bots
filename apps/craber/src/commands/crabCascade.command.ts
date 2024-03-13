@@ -1,16 +1,11 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import {
     Attachment,
     AttachmentBuilder,
+    CommandInteraction,
     Embed,
     EmbedBuilder,
     HexColorString,
@@ -23,18 +18,16 @@ import { CrabCascadeDto } from '../dto/crabCascade.dto';
     name: 'crabcascade',
     description: 'Get a cascade of crabs.',
 })
-@UsePipes(TransformPipe)
-export class CrabCascadeCommand
-    implements DiscordTransformedCommand<CrabCascadeDto>
-{
+export class CrabCascadeCommand {
     constructor(
         private crabService: CrabService,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: CrabCascadeDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: CrabCascadeDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         interaction.deferReply({ ephemeral: true });
 

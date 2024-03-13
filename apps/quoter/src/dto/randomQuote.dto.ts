@@ -2,7 +2,7 @@ import { Param, ParamType } from '@discord-nestjs/core';
 
 export class RandomQuoteDto {
     @Param({
-        name: 'User',
+        name: 'user',
         description: 'User to show a random quote from.',
         type: ParamType.USER,
         required: true,

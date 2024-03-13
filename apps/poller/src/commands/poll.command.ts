@@ -1,11 +1,5 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { createHash, randomBytes } from 'crypto';
@@ -19,6 +13,7 @@ import {
     CacheType,
     ChatInputCommandInteraction,
     ColorResolvable,
+    CommandInteraction,
     EmbedBuilder,
     GuildMemberRoleManager,
     InteractionReplyOptions,
@@ -64,17 +59,17 @@ type Vote = {
     name: 'poll',
     description: 'Initiate a poll in this channel.',
 })
-@UsePipes(TransformPipe)
-export class PollCommand implements DiscordTransformedCommand<PollDto> {
+export class PollCommand {
     constructor(
         @InjectModel(PollSettings.name)
         private pollSettingsModel: Model<PollSettingsDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: PollDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: PollDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         let guildSettings = (await this.pollSettingsModel.findOne({
             guild: interaction.guild.id,
@@ -126,7 +121,9 @@ export class PollCommand implements DiscordTransformedCommand<PollDto> {
     private createPollEmbed(poll: Poll) {
         const embed = new EmbedBuilder()
             .setTitle(
-                this.makeQuestion(poll.interaction.options.getString('title')),
+                this.makeQuestion(
+                    poll.interaction.options.get('title').value as string,
+                ),
             )
             .setColor(this.configService.get<ColorResolvable>('PrimaryColor'));
 
@@ -138,7 +135,8 @@ export class PollCommand implements DiscordTransformedCommand<PollDto> {
 
         let numOptions = 0;
         for (let i = 1; i <= 10; i++) {
-            const option = poll.interaction.options.getString(`option_${i}`);
+            const option = poll.interaction.options.get(`option_${i}`)
+                ?.value as string;
             if (option) {
                 if (buttonRows[buttonRows.length - 1].components.length === 5)
                     buttonRows.push(
@@ -446,7 +444,9 @@ export class PollCommand implements DiscordTransformedCommand<PollDto> {
         const embed = new EmbedBuilder()
             .setColor(this.configService.get<ColorResolvable>('PrimaryColor'))
             .setTitle(
-                this.makeQuestion(poll.interaction.options.getString('title')),
+                this.makeQuestion(
+                    poll.interaction.options.get('title').value as string,
+                ),
             )
             .setDescription(description)
             .setImage(`attachment://${poll.pollId}.png`);
@@ -524,9 +524,11 @@ export class PollCommand implements DiscordTransformedCommand<PollDto> {
                             y: { scale: 'yscale', field: 'amount' },
                             y2: { scale: 'yscale', value: 0 },
                             fill: {
-                                value: this.configService
-                                    .get<string>('PrimaryColor')
-                                    .replace('0x', '#'),
+                                value:
+                                    '#' +
+                                    this.configService.get<string>(
+                                        'PrimaryColor',
+                                    ),
                             },
                             cornerRadiusTopLeft: { value: 20 },
                             cornerRadiusTopRight: { value: 20 },

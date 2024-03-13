@@ -1,15 +1,10 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import {
     CacheType,
+    CommandInteraction,
     CommandInteractionOption,
     EmbedBuilder,
     HexColorString,
@@ -26,19 +21,17 @@ import {
     description:
         'Set settings for polls. If no parameters are passed, returns current settings.',
 })
-@UsePipes(TransformPipe)
-export class PollSettingsCommand
-    implements DiscordTransformedCommand<PollSettingsDto>
-{
+export class PollSettingsCommand {
     constructor(
         @InjectModel(PollSettings.name)
         private pollSettingsModel: Model<PollSettingsDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: PollSettingsDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: PollSettingsDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         const guildSettings = await this.pollSettingsModel.findOne({
             guild: interaction.guildId,

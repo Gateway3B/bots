@@ -9,6 +9,9 @@ export class Quote {
     user: string;
 
     @Prop()
+    guildId: string;
+
+    @Prop()
     quote: string;
 
     @Prop()

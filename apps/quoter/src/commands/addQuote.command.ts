@@ -3,19 +3,29 @@ import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-    EmbedBuilder,
-    HexColorString,
-    InteractionReplyOptions,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    CacheType,
+    CommandInteraction,
+    ComponentType,
+    MessageActionRowComponentBuilder,
+    ModalActionRowComponentBuilder,
+    ModalBuilder,
+    ModalSubmitInteraction,
+    TextInputBuilder,
+    TextInputStyle,
 } from 'discord.js';
 import { Model } from 'mongoose';
 import { Quote, QuoteDocument } from '../service/quote.schema';
 import { AddQuoteDto } from '../dto/addQuote.dto';
+import { createQuoteEmbed } from '../helpers';
 
 @Command({
     name: 'addquote',
     description: 'Add response with a trigger, with optional conditionals.',
 })
-export class AddRespCommand {
+export class AddQuoteCommand {
     constructor(
         @InjectModel(Quote.name)
         private quoteModel: Model<QuoteDocument>,
@@ -25,53 +35,128 @@ export class AddRespCommand {
     @Handler()
     async onAddQuote(
         @InteractionEvent(SlashCommandPipe) dto: AddQuoteDto,
-    ): Promise<InteractionReplyOptions> {
+        @InteractionEvent() interaction: CommandInteraction,
+    ): Promise<void> {
+        await this.addQuote(dto, interaction);
+    }
+
+    async addQuote(dto: AddQuoteDto, interaction: CommandInteraction) {
+        const modal = new ModalBuilder().setTitle('Quote').setCustomId('Quote');
+
+        const quoteInput = new TextInputBuilder()
+            .setLabel('Enter Quote')
+            .setMinLength(1)
+            .setStyle(TextInputStyle.Paragraph)
+            .setCustomId('quote')
+            .setRequired(true);
+
+        modal.addComponents(
+            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                quoteInput,
+            ),
+        );
+
+        await interaction.showModal(modal);
+
+        await interaction
+            .awaitModalSubmit({
+                time: 60_000,
+            })
+            .then(async (modalSubmittion) =>
+                this.modalSubmitHandler(dto, interaction, modalSubmittion),
+            )
+            .catch(
+                async () =>
+                    await interaction.followUp({
+                        content: 'Timed out...',
+                        ephemeral: true,
+                    }),
+            );
+    }
+
+    async modalSubmitHandler(
+        dto: AddQuoteDto,
+        interaction: CommandInteraction,
+        modalSubmittion: ModalSubmitInteraction<CacheType>,
+    ) {
+        if (!dto.year && !dto.month && !dto.day) {
+            const currDate = new Date();
+            dto.year = currDate.getFullYear();
+            dto.month = currDate.getMonth() + 1;
+            dto.day = currDate.getDate();
+        }
+
         const quote = new this.quoteModel({
+            quote: modalSubmittion.fields.getTextInputValue('quote'),
+            guildId: interaction.guild.id,
             ...dto,
         });
 
-        if (!quote.year && !quote.month && !quote.day) {
-            const currDate = new Date();
-            quote.year = currDate.getFullYear();
-            quote.month = currDate.getMonth();
-            quote.day = currDate.getDay();
-        }
+        const id = (await quote.save()).id;
 
-        await quote.save();
+        const embed = createQuoteEmbed(
+            this.configService,
+            quote,
+            'Quote Added',
+        );
 
-        const primaryColor =
-            this.configService.get<HexColorString>('PrimaryColor');
-
-        const embed = new EmbedBuilder()
-            .setColor(primaryColor)
-            .setTitle('Quote Added')
-            .addFields(
-                {
-                    name: 'User',
-                    value: `<@${quote.user}>`,
-                    inline: true,
-                },
-                {
-                    name: 'Quote',
-                    value: quote.quote,
-                    inline: true,
-                },
-            );
-
-        if (quote.year || quote.month || quote.day) {
-            const year = quote.year ?? '----';
-            const month = quote.month ?? '--';
-            const day = quote.day ?? '--';
-
-            embed.addFields({
-                name: 'Date',
-                value: `${month}/${day}/${year}`,
-                inline: true,
+        const deleteQuote =
+            new ActionRowBuilder<MessageActionRowComponentBuilder>({
+                components: [
+                    new ButtonBuilder()
+                        .setCustomId('Delete')
+                        .setLabel(`Delete Quote`)
+                        .setStyle(ButtonStyle.Primary),
+                ],
             });
-        }
 
-        return {
-            embeds: [embed],
-        };
+        await modalSubmittion.reply({
+            content: 'Saving...',
+            ephemeral: true,
+        });
+
+        setTimeout(async () => {
+            await modalSubmittion.deleteReply();
+
+            const response = await interaction.followUp({
+                embeds: [embed],
+                components: [deleteQuote],
+            });
+
+            response
+                .awaitMessageComponent<ComponentType.Button>({
+                    filter: (i) => {
+                        i.deferUpdate();
+                        return i.user.id === interaction.user.id;
+                    },
+                    time: 60_000,
+                })
+                .then(async (buttonClick) => {
+                    await this.quoteModel.findByIdAndDelete(id);
+
+                    const deleteQuote =
+                        new ActionRowBuilder<MessageActionRowComponentBuilder>({
+                            components: [
+                                new ButtonBuilder()
+                                    .setCustomId('Deleted')
+                                    .setLabel(`Quote Deleted`)
+                                    .setStyle(ButtonStyle.Primary)
+                                    .setDisabled(true),
+                            ],
+                        });
+
+                    await buttonClick.update({
+                        embeds: [embed],
+                        components: [deleteQuote],
+                    });
+                })
+                .catch(
+                    async () =>
+                        await response.edit({
+                            embeds: [embed],
+                            components: [],
+                        }),
+                );
+        }, 1_000);
     }
 }

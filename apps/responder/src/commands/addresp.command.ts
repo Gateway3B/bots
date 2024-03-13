@@ -1,33 +1,27 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { EmbedBuilder, HexColorString } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, HexColorString } from 'discord.js';
 import { Model } from 'mongoose';
 import { AddRespDto } from '../dtos/addresp.dto';
 import { Response, ResponseDocument } from '../service/response.schema';
+import { SlashCommandPipe } from '@discord-nestjs/common';
 
 @Command({
     name: 'addresp',
     description: 'Add response with a trigger, with optional conditionals.',
 })
-@UsePipes(TransformPipe)
-export class AddRespCommand implements DiscordTransformedCommand<AddRespDto> {
+export class AddRespCommand {
     constructor(
         @InjectModel(Response.name)
         private responseModel: Model<ResponseDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: AddRespDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: AddRespDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         console.log(dto);
         const primaryColor =
