@@ -31,7 +31,7 @@ export class AddQuoteContextMenuCommand {
         interaction: MessageContextMenuCommandInteraction,
     ) {
         const dto = new AddQuoteDto();
-        dto.user = interaction.user.id;
+        dto.user = interaction.targetMessage.author.id;
 
         const date = new Date(
             interaction.targetMessage.editedTimestamp ??
