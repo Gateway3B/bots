@@ -1,36 +1,28 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { EmbedBuilder, HexColorString } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, HexColorString } from 'discord.js';
 import { Model } from 'mongoose';
 import { ShowTickersDto } from '../dto/showtickers.dto';
 import { Favorite, FavoriteDocument } from '../service/favorite.schema';
-import * as yahooFinance from 'yahoo-finance';
+import yahooFinance from 'yahoo-finance2';
 
 @Command({
     name: 'showtickers',
     description: 'Show ticker favorites list.',
 })
-@UsePipes(TransformPipe)
-export class ShowTickersCommand
-    implements DiscordTransformedCommand<ShowTickersDto>
-{
+export class ShowTickersCommand {
     constructor(
         @InjectModel(Favorite.name)
         private favoriteModel: Model<FavoriteDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: ShowTickersDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: ShowTickersDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         const embed = new EmbedBuilder();
 
@@ -55,12 +47,7 @@ export class ShowTickersCommand
         }
 
         for (let i = 0; i < favorites.length; i++) {
-            const quote = await yahooFinance
-                .quote({
-                    symbol: favorites[i].ticker,
-                    modules: ['price'],
-                })
-                .catch(() => {});
+            const quote = await yahooFinance.quote(favorites[i].ticker).catch();
 
             if (!quote) {
                 embed
@@ -71,18 +58,9 @@ export class ShowTickersCommand
                 return;
             }
 
-            tickers += quote.price.symbol + '\n';
-            prices +=
-                '$' +
-                parseFloat(quote.price.regularMarketPrice).toFixed(2) +
-                '\n';
-            highsLows +=
-                '$' +
-                parseFloat(quote.price.regularMarketDayHigh).toFixed(2) +
-                '/' +
-                '$' +
-                parseFloat(quote.price.regularMarketDayLow).toFixed(2) +
-                '\n';
+            tickers += quote.symbol + '\n';
+            prices += `$${quote.regularMarketPrice}\n`;
+            highsLows += `$${quote.regularMarketDayHigh}/$${quote.regularMarketDayLow}\n`;
         }
 
         embed

@@ -1,17 +1,11 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-} from '@discord-nestjs/core';
-import { UsePipes } from '@nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
+    CommandInteraction,
     EmbedBuilder,
     HexColorString,
 } from 'discord.js';
@@ -22,17 +16,16 @@ import { Response, ResponseDocument } from '../service/response.schema';
     name: 'showresps',
     description: 'Show all reponses set for this server.',
 })
-@UsePipes(TransformPipe)
-export class ShowRespCommand implements DiscordTransformedCommand<any> {
+export class ShowRespCommand {
     constructor(
         @InjectModel(Response.name)
         private responseModel: Model<ResponseDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: any,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         const primaryColor =
             this.configService.get<HexColorString>('PrimaryColor');

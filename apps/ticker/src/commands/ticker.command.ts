@@ -1,22 +1,17 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
     ChatInputCommandInteraction,
+    CommandInteraction,
     EmbedBuilder,
     HexColorString,
 } from 'discord.js';
 import { TickerDto } from '../dto/ticker.dto';
-import * as yahooFinance from 'yahoo-finance';
+import yahooFinance from 'yahoo-finance2';
 import * as sharp from 'sharp';
 import * as vega from 'vega';
 
@@ -24,14 +19,16 @@ import * as vega from 'vega';
     name: 'ticker',
     description: 'Get ticker information.',
 })
-@UsePipes(TransformPipe)
-export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
+export class TickerCommand {
     constructor(private configService: ConfigService) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: TickerDto,
-        { interaction }: TransformedCommandExecutionContext,
+        @InteractionEvent(SlashCommandPipe) dto: TickerDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
+        await interaction.deferReply();
+
         const embed = new EmbedBuilder();
 
         const primaryColor =
@@ -39,43 +36,32 @@ export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
 
         const tickerString = interaction.options.get('ticker').value as string;
 
-        const quote = await yahooFinance
-            .quote({
-                symbol: tickerString,
-                modules: ['price'],
-            })
-            .catch();
+        const quote = await yahooFinance.quote(tickerString).catch();
 
-        if (!quote || !quote.price.regularMarketPrice) {
+        if (!quote || !quote.regularMarketPrice) {
             embed.setTitle('Invalid Ticker').setColor(primaryColor);
 
-            interaction.reply({ embeds: [embed] });
+            interaction.editReply({ embeds: [embed] });
             return;
         }
 
         embed
-            .setTitle(quote.price.symbol)
+            .setTitle(quote.symbol)
             .setColor(primaryColor)
             .addFields(
                 {
                     name: 'Day Price',
-                    value:
-                        '$' +
-                        parseFloat(quote.price.regularMarketPrice).toFixed(2),
+                    value: `$${quote.regularMarketPrice}`,
                     inline: true,
                 },
                 {
                     name: 'Day High',
-                    value:
-                        '$' +
-                        parseFloat(quote.price.regularMarketDayHigh).toFixed(2),
+                    value: `$${quote.regularMarketDayHigh}`,
                     inline: true,
                 },
                 {
                     name: 'Day Low',
-                    value:
-                        '$' +
-                        parseFloat(quote.price.regularMarketDayLow).toFixed(2),
+                    value: `$${quote.regularMarketDayLow}`,
                     inline: true,
                 },
             )
@@ -92,7 +78,7 @@ export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
         );
         ticker.buttonRows = buttonRows;
 
-        interaction.reply({
+        await interaction.editReply({
             embeds: [embed],
             components: buttonRows,
             files: [{ attachment: stockhistory, name: `stockhistory.png` }],
@@ -111,10 +97,12 @@ export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
 
         ticker.active = 0;
 
+        const tickerString = interaction.options.get('ticker').value as string;
+
         for (let i = 0; i < 4; i++) {
-            const customId = `${i}${interaction.options.getString(
-                'ticker',
-            )}${Math.floor(Math.random() * 1000)}`;
+            const customId = `${i}${tickerString}${Math.floor(
+                Math.random() * 1000,
+            )}`;
             buttonRows[0].addComponents(
                 new ButtonBuilder()
                     .setCustomId(customId)
@@ -136,7 +124,7 @@ export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
 
             collector.on('collect', async (buttonHit) => {
                 const stockhistory = await this.generateGraph(
-                    interaction.options.getString('ticker'),
+                    tickerString,
                     days[i],
                 );
 
@@ -195,11 +183,8 @@ export class TickerCommand implements DiscordTransformedCommand<TickerDto> {
         startDate.setDate(startDate.getDate() - days);
 
         const quotes = await yahooFinance
-            .historical({
-                symbol: ticker,
-                from: startDate.toISOString(),
-                to: new Date().toISOString(),
-                period: 'd',
+            .historical(ticker, {
+                period1: startDate.toISOString(),
             })
             .catch();
 

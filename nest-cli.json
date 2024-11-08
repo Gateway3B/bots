@@ -54,6 +54,15 @@
         "tsConfigPath": "apps/responder/tsconfig.app.json"
       }
     },
+    "quoter": {
+      "type": "application",
+      "root": "apps/quoter",
+      "entryFile": "main",
+      "sourceRoot": "apps/quoter/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/quoter/tsconfig.app.json"
+      }
+    },
     "notion": {
       "type": "application",
       "root": "apps/notion",

@@ -1,34 +1,28 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { EmbedBuilder, HexColorString } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, HexColorString } from 'discord.js';
 import { Model } from 'mongoose';
 import { DelRespsDto } from '../dtos/delresps.dto';
 import { Response, ResponseDocument } from '../service/response.schema';
+import { SlashCommandPipe } from '@discord-nestjs/common';
 
 @Command({
     name: 'delresps',
     description:
         'Delete all responses with trigger or tidder and optional response.',
 })
-@UsePipes(TransformPipe)
-export class DelRespsCommand implements DiscordTransformedCommand<DelRespsDto> {
+export class DelRespsCommand {
     constructor(
         @InjectModel(Response.name)
         private responseModel: Model<ResponseDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: DelRespsDto,
-        { interaction }: TransformedCommandExecutionContext<any>,
+        @InteractionEvent(SlashCommandPipe) dto: DelRespsDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         const primaryColor =
             this.configService.get<HexColorString>('PrimaryColor');

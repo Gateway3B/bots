@@ -1,14 +1,8 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    Payload,
-    TransformedCommandExecutionContext,
-    UsePipes,
-} from '@discord-nestjs/core';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { EmbedBuilder, HexColorString } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, HexColorString } from 'discord.js';
 import { Model } from 'mongoose';
 import { DelTickerDto } from '../dto/delticker.dto';
 import { Favorite, FavoriteDocument } from '../service/favorite.schema';
@@ -17,19 +11,17 @@ import { Favorite, FavoriteDocument } from '../service/favorite.schema';
     name: 'delticker',
     description: 'Delete ticker from favorites list.',
 })
-@UsePipes(TransformPipe)
-export class DelTickerCommand
-    implements DiscordTransformedCommand<DelTickerDto>
-{
+export class DelTickerCommand {
     constructor(
         @InjectModel(Favorite.name)
         private favoriteModel: Model<FavoriteDocument>,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        @Payload() dto: DelTickerDto,
-        { interaction }: TransformedCommandExecutionContext<any>,
+        @InteractionEvent(SlashCommandPipe) dto: DelTickerDto,
+        @InteractionEvent() interaction: CommandInteraction,
     ): Promise<void> {
         const embed = new EmbedBuilder();
 

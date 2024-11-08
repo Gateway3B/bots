@@ -1,13 +1,9 @@
-import { TransformPipe } from '@discord-nestjs/common';
-import {
-    Command,
-    DiscordTransformedCommand,
-    TransformedCommandExecutionContext,
-} from '@discord-nestjs/core';
-import { UsePipes } from '@nestjs/common';
+import { SlashCommandPipe } from '@discord-nestjs/common';
+import { Command, Handler, InteractionEvent } from '@discord-nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import {
+    CommandInteraction,
     EmbedBuilder,
     HexColorString,
     InteractionReplyOptions,
@@ -18,17 +14,19 @@ import { CrabService } from '../service/crab.service';
     name: 'crab',
     description: 'Get a crab.',
 })
-@UsePipes(TransformPipe)
-export class CrabCommand implements DiscordTransformedCommand<any> {
+export class CrabCommand {
     constructor(
         private crabService: CrabService,
         private configService: ConfigService,
     ) {}
 
+    @Handler()
     async handler(
-        dto: any,
-        executionContext: TransformedCommandExecutionContext<any>,
+        @InteractionEvent(SlashCommandPipe) dto: any,
+        @InteractionEvent() interaction: CommandInteraction<any>,
     ): Promise<InteractionReplyOptions> {
+        await interaction.deferReply();
+
         const count = this.crabService.crabs.length;
         const index = Math.floor(Math.random() * count);
 
@@ -62,7 +60,7 @@ export class CrabCommand implements DiscordTransformedCommand<any> {
                     .replace('.', '')}.jpg`,
             );
 
-        return {
+        await interaction.editReply({
             embeds: [embed],
             files: [
                 {
@@ -70,6 +68,6 @@ export class CrabCommand implements DiscordTransformedCommand<any> {
                     name: `${crab.name.replace('.', '')}.jpg`,
                 },
             ],
-        };
+        });
     }
 }
