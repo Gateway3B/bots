@@ -2,28 +2,34 @@ version: '3'
 
 services:
     database:
-        image: 'mongo:latest'
+        image: mongo:latest
         container_name: database
-        ports:
+        networks:
+            - bots
+        expose:
             - 27017:27017
         environment:
-            - MONGO_INITDB_ROOT_USERNAME=
-            - MONGO_INITDB_ROOT_PASSWORD=
+            - MONGO_INITDB_ROOT_USERNAME=docker
+            - MONGO_INITDB_ROOT_PASSWORD=docker
         volumes:
             - db:/data/db
     server:
-        image: 'bots'
+        image: bots
+        container_name: bots
+        networks:
+            - bots
         depends_on:
             - database
         environment:
             - MONGO_URI=
-            - PrimaryColor=0x30972D
-            - SecondaryColor=0x48005F
+            - PrimaryColor=30972D
+            - SecondaryColor=48005F
             - TEST_GUILD=
             - CRABER_TOKEN=
             - POLLER_TOKEN=
             - TICKER_TOKEN=
             - RESPONDER_TOKEN=
+            - QUOTER_TOKEN=
             - NOTION_TOKEN=
             - SHOPPING_LIST_DATABASE_ID=
             - CLEAR_PUBLIX_BUTTON_ID=
@@ -31,5 +37,9 @@ services:
             - CHECK_ALL_PUBLIX_BUTTON_ID=
             - CHECK_ALL_COSTCO_BUTTON_ID=
 volumes:
-  db:
-    driver: local
+    db:
+        driver: local
+
+networks:
+    bots:
+        name: bots
