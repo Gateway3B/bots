@@ -12,7 +12,8 @@ services:
             - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
             - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
         volumes:
-            - db:/data/db
+            - ${APP_PATH}/bots_db:/data/db
+            
     server:
         image: hl-docker-registry.g3tech.net/bots:latest
         container_name: bots
@@ -37,9 +38,6 @@ services:
             - CLEAR_COSTCO_BUTTON_ID=${CLEAR_COSTCO_BUTTON_ID}
             - CHECK_ALL_PUBLIX_BUTTON_ID=${CHECK_ALL_PUBLIX_BUTTON_ID}
             - CHECK_ALL_COSTCO_BUTTON_ID=${CHECK_ALL_COSTCO_BUTTON_ID}
-volumes:
-    db:
-        driver: local
 
 networks:
     bots:
