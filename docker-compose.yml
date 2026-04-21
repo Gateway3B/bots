@@ -14,8 +14,8 @@ services:
         volumes:
             - db:/data/db
     server:
-        image: bots
-        container_name: hl-docker-registry.g3tech.net/bots:latest
+        image: hl-docker-registry.g3tech.net/bots:latest
+        container_name: bots
         networks:
             - bots
         depends_on:
@@ -30,7 +30,7 @@ services:
             - TICKER_TOKEN=${TICKER_TOKEN}
             - RESPONDER_TOKEN=${RESPONDER_TOKEN}
             - QUOTER_TOKEN=${QUOTER_TOKEN}
-            
+
             - NOTION_TOKEN=${NOTION_TOKEN}
             - SHOPPING_LIST_DATABASE_ID=${SHOPPING_LIST_DATABASE_ID}
             - CLEAR_PUBLIX_BUTTON_ID=${CLEAR_PUBLIX_BUTTON_ID}
