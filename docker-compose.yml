@@ -9,32 +9,34 @@ services:
         expose:
             - 27017:27017
         environment:
-            - MONGO_INITDB_ROOT_USERNAME=
-            - MONGO_INITDB_ROOT_PASSWORD=
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
         volumes:
             - db:/data/db
     server:
         image: bots
-        container_name: bots
+        container_name: hl-docker-registry.g3tech.net/bots:latest
         networks:
             - bots
         depends_on:
             - database
         environment:
-            - MONGO_URI=
-            - PrimaryColor=
-            - SecondaryColor=
-            - TEST_GUILD=
-            - CRABER_TOKEN=
-            - POLLER_TOKEN=
-            - TICKER_TOKEN=
-            - RESPONDER_TOKEN=
-            - NOTION_TOKEN=
-            - SHOPPING_LIST_DATABASE_ID=
-            - CLEAR_PUBLIX_BUTTON_ID=
-            - CLEAR_COSTCO_BUTTON_ID=
-            - CHECK_ALL_PUBLIX_BUTTON_ID=
-            - CHECK_ALL_COSTCO_BUTTON_ID=
+            - MONGO_URI=${MONGO_URI}
+            - PrimaryColor=30972D
+            - SecondaryColor=48005F
+            - TEST_GUILD=${TEST_GUILD}
+            - CRABER_TOKEN=${CRABER_TOKEN}
+            - POLLER_TOKEN=${POLLER_TOKEN}
+            - TICKER_TOKEN=${TICKER_TOKEN}
+            - RESPONDER_TOKEN=${RESPONDER_TOKEN}
+            - QUOTER_TOKEN=${QUOTER_TOKEN}
+            
+            - NOTION_TOKEN=${NOTION_TOKEN}
+            - SHOPPING_LIST_DATABASE_ID=${SHOPPING_LIST_DATABASE_ID}
+            - CLEAR_PUBLIX_BUTTON_ID=${CLEAR_PUBLIX_BUTTON_ID}
+            - CLEAR_COSTCO_BUTTON_ID=${CLEAR_COSTCO_BUTTON_ID}
+            - CHECK_ALL_PUBLIX_BUTTON_ID=${CHECK_ALL_PUBLIX_BUTTON_ID}
+            - CHECK_ALL_COSTCO_BUTTON_ID=${CHECK_ALL_COSTCO_BUTTON_ID}
 volumes:
     db:
         driver: local
