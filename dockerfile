@@ -5,9 +5,9 @@ RUN mkdir -p /app
 
 WORKDIR /app
 
-COPY package.json /app
+COPY package.json package-lock.json /app/
 
-RUN npm install --legacy-peer-dep --ignore-scripts=false
+RUN npm ci --legacy-peer-deps --ignore-scripts=false
 
 COPY . /app
 
