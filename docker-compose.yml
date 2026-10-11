@@ -15,7 +15,8 @@ services:
             - ${APP_PATH}/bots_db:/data/db
             
     server:
-        image: hl-docker-registry.g3tech.net/bots:latest
+        image: ghcr.io/gateway3b/bots:latest
+        pull_policy: always
         container_name: bots
         networks:
             - bots
